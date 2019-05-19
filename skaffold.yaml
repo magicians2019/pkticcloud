@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/magicians2019/pkticcloud:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/magicians2019/pkticcloud:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: pkticcloud
+        chartPath: charts/pkticcloud
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/magicians2019/pkticcloud'
+          image.tag: '{{.DIGEST_HEX}}'
